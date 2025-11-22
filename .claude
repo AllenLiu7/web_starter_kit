@@ -1,0 +1,328 @@
+# Project-Specific Instructions for Claude
+
+## File Encoding Issues
+
+**CRITICAL**: When writing markdown files, avoid using emojis or Unicode characters that may cause encoding issues on Windows systems.
+
+**Problem**: Previously wrote emojis (🎯, 📦, 🏗️, etc.) to markdown files which rendered as control characters (STX, NUL, FA) in the user's editor.
+
+**Solution**: Use plain ASCII text only. Replace emojis with:
+- Section headers: Use ## instead of emoji bullets
+- Checkboxes: Use - [x] or - [ ]
+- Emphasis: Use **bold** or UPPERCASE for important items
+
+**Example**:
+```markdown
+❌ BAD: ## 🎯 Project Goals
+✅ GOOD: ## Project Goals
+```
+
+Always use plain ASCII text in documentation files.
+
+---
+
+## Implementation Plan Quality Standards
+
+**CRITICAL**: When creating comprehensive implementation plans, always follow this process to prevent critical bugs.
+
+### Pre-Planning Research (MANDATORY)
+
+Before writing any implementation plan:
+
+1. **Verify Current Compatibility**
+   - Use WebSearch to check current version compatibility (e.g., "shadcn/ui React 19 support 2025")
+   - Use WebFetch to verify official documentation for specific behaviors
+   - Check for known issues and gotchas in the tech stack
+   - Verify version compatibility matrices
+
+2. **Research Known Patterns**
+   - Search for production setup guides from official sources
+   - Look at similar starter kits/boilerplates
+   - Check GitHub issues for common setup problems
+
+### Mental Execution (REQUIRED)
+
+For each step in the plan, ask:
+- "If I run this command, what exactly happens?"
+- "What are the prerequisites for this to succeed?"
+- "What could cause this to fail?"
+- "Are there any platform-specific issues?" (Windows/Mac/Linux)
+
+### Challenge Assumptions (CRITICAL)
+
+When writing something confidently, pause and verify:
+- "Am I sure about this, or am I pattern-matching from training data?"
+- "Have I verified this specific version/combination works?"
+- "Is this based on current docs or potentially outdated knowledge?"
+
+**Example of BAD assumption**: "Prisma reads .env.local" (wrong - Prisma only reads .env)
+**Example of GOOD verification**: Check Prisma docs to confirm it only reads .env file
+
+### Every Implementation Plan Must Include
+
+1. **Verification Steps**: After each major phase, include commands to verify success
+2. **Known Gotchas Section**: Document common failure points and solutions
+3. **Pre-flight Checks**: List prerequisites that must exist before starting
+4. **Platform Compatibility**: Note any Windows/Mac/Linux-specific commands
+
+### Document Uncertainty
+
+If unsure about any technical detail:
+- DO NOT guess or pattern-match
+- EXPLICITLY research and verify first
+- Or note the uncertainty and mark for verification
+
+### Past Mistakes to Avoid
+
+1. **Prisma Environment Variables** (2025-01-22)
+   - WRONG: Assumed Prisma reads .env.local like Next.js
+   - RIGHT: Verified Prisma only reads .env file
+
+2. **Tailwind CSS Version** (2025-01-22)
+   - WRONG: Recommended latest (v4 alpha) without checking stability
+   - RIGHT: Verified v4 is alpha, recommended stable v3.4
+
+3. **Zustand SSR Hydration** (2025-01-22)
+   - WRONG: Didn't consider SSR hydration issues with persist middleware
+   - RIGHT: Research known issues, add skipHydration flag
+
+4. **Legacy Peer Deps** (2025-01-22)
+   - WRONG: Added --legacy-peer-deps based on outdated knowledge
+   - RIGHT: Verified shadcn/ui officially supports React 19
+
+**REMEMBER**: Comprehensive-looking plans mean nothing if they fail at step 5. Better to research for 10 minutes than create a broken plan.
+
+---
+
+## Common AI Code Generation Errors to Avoid
+
+**CRITICAL**: This project has ESLint rules optimized to catch AI-generated code errors. Prevent these issues BEFORE writing code.
+
+### 1. Async/Promise Errors (MOST COMMON)
+
+**ERROR: Forgetting `await` (Floating Promises)**
+```typescript
+// WRONG - Silent failure
+async function saveUser(user: User) {
+  saveToDatabase(user)  // Missing await!
+  sendEmail(user.email) // Runs before save completes
+}
+
+// CORRECT
+async function saveUser(user: User) {
+  await saveToDatabase(user)
+  await sendEmail(user.email)
+}
+```
+
+**ERROR: Using async in forEach**
+```typescript
+// WRONG - forEach doesn't await
+users.forEach(async (user) => {
+  await processUser(user) // Doesn't wait!
+})
+
+// CORRECT - Use for...of
+for (const user of users) {
+  await processUser(user)
+}
+```
+
+**ERROR: Promise in conditionals**
+```typescript
+// WRONG - Should await the promise
+if (checkAuth()) { // Returns Promise<boolean>
+  doSomething()
+}
+
+// CORRECT
+if (await checkAuth()) {
+  doSomething()
+}
+```
+
+**ERROR: Returning promise in try-catch**
+```typescript
+// WRONG - Promise rejection escapes try-catch
+try {
+  return fetchData() // Error NOT caught!
+} catch (err) {
+  handleError(err)   // Never called for fetchData errors
+}
+
+// CORRECT - Await promise in try-catch
+try {
+  return await fetchData() // Error caught
+} catch (err) {
+  handleError(err)          // Called for fetchData errors
+}
+```
+
+### 2. React Hooks Errors
+
+**ERROR: Missing dependencies in useEffect**
+```typescript
+// WRONG - Stale closure, infinite loops
+useEffect(() => {
+  fetchData(userId) // userId not in deps!
+}, [])
+
+// CORRECT
+useEffect(() => {
+  fetchData(userId)
+}, [userId])
+```
+
+**ERROR: Missing keys in lists**
+```typescript
+// WRONG - Causes rendering bugs
+{users.map(user => <UserCard user={user} />)}
+
+// CORRECT
+{users.map(user => <UserCard key={user.id} user={user} />)}
+```
+
+**ERROR: Using array index as key**
+```typescript
+// WRONG - Breaks when list changes
+{users.map((user, i) => <UserCard key={i} user={user} />)}
+
+// CORRECT - Use stable unique ID
+{users.map(user => <UserCard key={user.id} user={user} />)}
+```
+
+### 3. Logic Errors TypeScript Won't Catch
+
+**ERROR: Assignment instead of comparison**
+```typescript
+// WRONG - Assignment in condition
+if (user = getUser()) { // Should be ===
+  console.log(user)
+}
+
+// CORRECT
+if (user === getUser()) {
+  console.log(user)
+}
+```
+
+**ERROR: Missing break in switch**
+```typescript
+// WRONG - Falls through to next case
+switch (status) {
+  case 'pending':
+    setPending()
+    // Missing break!
+  case 'active':
+    setActive()
+}
+
+// CORRECT
+switch (status) {
+  case 'pending':
+    setPending()
+    break
+  case 'active':
+    setActive()
+    break
+}
+```
+
+**ERROR: Missing return in array callbacks**
+```typescript
+// WRONG - Missing return
+const ids = users.map(user => {
+  user.id // No return!
+})
+
+// CORRECT
+const ids = users.map(user => user.id)
+```
+
+### 4. TypeScript Best Practices
+
+**ERROR: Using || instead of ?? for null checks**
+```typescript
+// WRONG - 0, '', false are falsy
+const count = user.count || 0 // Replaces 0 with 0!
+
+// CORRECT - Only null/undefined
+const count = user.count ?? 0
+```
+
+**ERROR: Manual null checks instead of optional chaining**
+```typescript
+// WRONG - Verbose
+const email = user && user.profile && user.profile.email
+
+// CORRECT - Use optional chaining
+const email = user?.profile?.email
+```
+
+**ERROR: Using any type**
+```typescript
+// WRONG - Loses type safety
+const data: any = fetchData()
+
+// CORRECT - Use proper types
+const data: User = fetchData()
+```
+
+### 5. Next.js Specific
+
+**ERROR: Using <img> instead of next/image**
+```typescript
+// WRONG - No optimization
+<img src="/photo.jpg" />
+
+// CORRECT - Use Next.js Image
+import Image from 'next/image'
+<Image src="/photo.jpg" alt="Photo" width={200} height={200} />
+```
+
+**ERROR: Using <a> for internal links**
+```typescript
+// WRONG - Client-side routing breaks
+<a href="/about">About</a>
+
+// CORRECT - Use Next.js Link
+import Link from 'next/link'
+<Link href="/about">About</Link>
+```
+
+### Pre-Code Checklist
+
+Before writing async code, ask:
+- [ ] Did I add `await` to every Promise?
+- [ ] Am I using `for...of` instead of `forEach` with async?
+- [ ] Are async functions in the right places? (not in conditions/forEach)
+- [ ] Did I await promises returned in try-catch blocks?
+
+Before writing React components, ask:
+- [ ] Did I add keys to all mapped elements?
+- [ ] Are my useEffect dependencies complete?
+- [ ] Am I using stable IDs for keys (not array indices)?
+
+Before writing conditionals/loops, ask:
+- [ ] Is this `=` or `===`? (assignment vs comparison)
+- [ ] Did I add `break` to all switch cases?
+- [ ] Do my array callbacks have explicit `return` statements?
+
+**REMEMBER**: ESLint will catch these errors, but preventing them saves time. Run `npm run lint` frequently during development.
+
+---
+
+## Structured Logging
+
+**CRITICAL**: This project uses structured logging (pino) for debugging. NEVER use `console.log` in production code.
+
+**Quick Reference:**
+```typescript
+import { logger } from '@/lib/logger'
+
+logger.info({ userId }, 'User logged in')           // Important events
+logger.error({ error, userId }, 'Operation failed')  // Errors (always in catch blocks)
+logger.debug({ data }, 'Processing data')            // Debug info (hidden in production)
+```
+
+**For detailed patterns and best practices, see:** [context/Logging-Guide.md](context/Logging-Guide.md)
