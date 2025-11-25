@@ -326,3 +326,40 @@ logger.debug({ data }, 'Processing data')            // Debug info (hidden in pr
 ```
 
 **For detailed patterns and best practices, see:** [context/Logging-Guide.md](context/Logging-Guide.md)
+
+---
+
+## Error Handling & Validation
+
+**CRITICAL**: Use standardized error classes and validation helpers for consistent error handling.
+
+**Quick Reference:**
+```typescript
+// Error classes
+import { ValidationError, NotFoundError, UnauthorizedError } from '@/lib/errors'
+
+throw new ValidationError('Email is required')
+throw new NotFoundError('User')
+throw new UnauthorizedError()
+
+// Validation helpers
+import { validateRequired, validateEmail } from '@/lib/validation'
+
+const email = validateEmail(validateRequired(data.email, 'email'))
+
+// Type guards
+import { isNotNull, isDefined } from '@/lib/guards'
+
+if (isNotNull(user)) {
+  // user is guaranteed non-null here
+  logger.info({ userId: user.id }, 'User found')
+}
+
+// API responses
+import { successResponse, errorResponse } from '@/types/api'
+
+return Response.json(successResponse(user))
+return Response.json(errorResponse('Not found', 'NOT_FOUND'), { status: 404 })
+```
+
+**For detailed patterns and best practices, see:** [context/Error-Handling-Guide.md](context/Error-Handling-Guide.md)

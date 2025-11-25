@@ -14,6 +14,7 @@ A production-ready Next.js 15 starter kit optimized for AI-assisted development,
 - **React Hook Form + Zod** for form validation
 - **Testing Infrastructure** with Vitest and Playwright
 - **Code Quality Tools** with ESLint rules optimized for AI-generated code
+- **AI-Friendly Utilities** with standardized error handling, validation, and type guards
 - **Structured Logging** with pino for debugging AI-generated code
 - **SEO Optimization** with next-seo and metadata helpers
 - **Toast Notifications** with Sonner
@@ -24,7 +25,7 @@ A production-ready Next.js 15 starter kit optimized for AI-assisted development,
 
 ### Core Framework
 
-- **Next.js 15** - Latest features, async APIs, Server Components
+- **Next.js 16** - Latest features, async APIs, Server Components, proxy.ts support
 - **React 19** - Latest React features
 - **TypeScript** - Strict mode configuration
 
@@ -55,6 +56,13 @@ A production-ready Next.js 15 starter kit optimized for AI-assisted development,
 - **date-fns** - Date manipulation (tree-shakeable)
 - **clsx + tailwind-merge** - Conditional Tailwind classes
 - **pino** - Structured logging for production debugging
+
+### AI-Friendly Development
+
+- **Standardized Error Handling** - Consistent error classes (ValidationError, NotFoundError, etc.)
+- **Input Validation Helpers** - Early validation utilities (validateRequired, validateEmail, etc.)
+- **Type Guards** - Runtime type checking with TypeScript narrowing (isNotNull, isDefined, etc.)
+- **API Response Types** - Consistent response structures (ApiResponse, PaginatedResponse)
 
 ### Testing
 
@@ -323,8 +331,10 @@ This starter kit can be deployed to any platform that supports Next.js:
 
 For detailed setup instructions and troubleshooting, see:
 
+- [AI Coding Guidelines](context/AI-Coding-Guidelines.md) - **Start here** for AI-assisted development patterns
 - [Initial Setup Guide](context/initial-setup.md) - Comprehensive step-by-step setup
 - [Environment Variables Guide](context/initial-setup.md#environment-variables-guide) - Detailed environment configuration
+- [Error Handling Guide](context/Error-Handling-Guide.md) - Standardized error handling and validation
 - [Testing Guide](context/Testing-Guide.md) - Testing infrastructure and best practices
 - [Code Quality Guide](context/Code-Quality.md) - Prettier, ESLint, Husky, and lint-staged setup
 - [Logging Guide](context/Logging-Guide.md) - Structured logging for debugging AI-generated code
@@ -365,4 +375,4 @@ For issues and questions:
 
 ---
 
-Built with Next.js 15, React 19, TypeScript, Tailwind CSS, Supabase, and Prisma.
+Built with Next.js 16, React 19, TypeScript, Tailwind CSS, Supabase, and Prisma.
